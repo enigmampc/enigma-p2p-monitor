@@ -3,54 +3,50 @@ const [boostrapNodeAddress] = process.argv.slice(process.argv.length - 1);
 
 console.log(boostrapNodeAddress);
 
-const libp2p = require("libp2p");
 const TCP = require("libp2p-tcp");
 const Mplex = require("libp2p-mplex");
 const KadDHT = require("libp2p-kad-dht");
-const defaultsDeep = require("@nodeutils/defaults-deep");
 const Bootstrap = require("libp2p-bootstrap");
 const SPDY = require("libp2p-spdy");
 const WS = require("libp2p-websockets");
+const PeerInfo = require("peer-info");
 
-class EnigmaP2pNode extends libp2p {
-  constructor(_options) {
-    const defaults = {
-      modules: {
-        transport: [TCP, WS],
-        streamMuxer: [Mplex, SPDY],
-        peerDiscovery: [Bootstrap],
-        dht: KadDHT
+const { createLibp2p } = require("libp2p");
+
+createLibp2p(
+  {
+    modules: {
+      transport: [TCP, WS],
+      streamMuxer: [Mplex, SPDY],
+      peerDiscovery: [Bootstrap],
+      dht: KadDHT
+    },
+    config: {
+      dht: {
+        kBucketSize: 5
       },
-      config: {
-        dht: {
-          kBucketSize: 5
-        },
-        EXPERIMENTAL: {
-          dht: true,
-          pubsub: true
-        },
-        peerDiscovery: {
-          bootstrap: {
-            interval: 2000,
-            enabled: false,
-            list: []
-          }
+      // EXPERIMENTAL: {
+      //   dht: true,
+      //   pubsub: true
+      // },
+      peerDiscovery: {
+        bootstrap: {
+          interval: 2000,
+          enabled: false,
+          list: [boostrapNodeAddress]
         }
       }
-    };
-    const finalConfigurations = defaultsDeep(_options, defaults);
-    super(finalConfigurations);
-  }
-}
-
-const monitorNode = new EnigmaP2pNode({
-  peerInfo,
-  config: {
-    peerDiscovery: {
-      bootstrap: {
-        enabled: this.isDiscover,
-        list: [boostrapNodeAddress]
-      }
     }
+  },
+  (err, libp2p) => {
+    if (err) {
+      throw err;
+    }
+    libp2p.start(err => {
+      if (err) {
+        throw err;
+      }
+      console.log("here");
+    });
   }
-});
+);
