@@ -32,6 +32,10 @@ for (const node of boostrapNodes) {
 
   console.error(`my_libp2p_id\t${node.peerInfo.id.toB58String()}`);
 
+  for (const multiaddr of node.peerInfo.multiaddrs.toArray()) {
+    console.error(`my_multiaddr\t${multiaddr.toString()}`);
+  }
+
   const nodeDial = promisify(node.dial).bind(node);
   node.on("peer:discovery", async peerInfo => {
     try {
