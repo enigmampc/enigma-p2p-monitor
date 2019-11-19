@@ -14,7 +14,8 @@ for (const node of boostrapNodes) {
 (async () => {
   const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
   const peerInfo = await PeerInfoCreate();
-  // TODO catch PeerInfoCreate
+  // No need to try/catch. Let it throw.
+
   peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
 
   const node = new LibP2pBundle({
