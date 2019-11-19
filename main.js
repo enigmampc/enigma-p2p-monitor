@@ -50,6 +50,10 @@ for (const node of boostrapNodes) {
     console.error("peer:connect\t" + peerInfo.id.toB58String());
   });
 
+  node.on("peer:disconnect", peerInfo => {
+    console.error("peer:disconnect\t" + peerInfo.id.toB58String());
+  });
+
   const topics = ["/taskresults/0.1", "/broadcast/0.1"];
 
   for (const topic of topics) {
