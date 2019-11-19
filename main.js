@@ -13,9 +13,7 @@ for (const node of boostrapNodes) {
 
 (async () => {
   const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
-  const peerInfo = await PeerInfoCreate();
-  // No need to try/catch. Let it throw.
-
+  const peerInfo = await PeerInfoCreate(); // No need to try/catch. Let it throw.
   peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
 
   const node = new LibP2pBundle({
@@ -30,15 +28,18 @@ for (const node of boostrapNodes) {
   });
 
   const nodeStart = promisify(node.start).bind(node);
-  await nodeStart();
-  // No need to try/catch. Let it throw.
+  await nodeStart(); // No need to try/catch. Let it throw.
 
   console.error(`my_libp2p_id\t${node.peerInfo.id.toB58String()}`);
 
+  const nodeDial = promisify(node.dial).bind(node);
   node.on("peer:discovery", async peerInfo => {
-    const nodeDial = promisify(node.dial).bind(node);
-    await nodeDial(peerInfo);
-    // No need to try/catch. Let it throw.
+    try {
+      await nodeDial(peerInfo);
+    } catch (e) {
+      // Discovered a peer but couldn't connect.
+      // Will try again in ${peerDiscovery.bootstrap.interval}ms time
+    }
   });
 
   node.on("peer:connect", peerInfo => {
