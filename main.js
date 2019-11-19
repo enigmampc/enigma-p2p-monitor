@@ -1,73 +1,38 @@
 #!/usr/bin/env node
-const boostrapNodes = process.argv.slice(2);
 
-boostrapNodes.forEach(n => {
-  console.log("boostrap\t" + n);
-});
-
-const TCP = require("libp2p-tcp");
-const Mplex = require("libp2p-mplex");
-const KadDHT = require("libp2p-kad-dht");
-const Bootstrap = require("libp2p-bootstrap");
-const SECIO = require("libp2p-secio");
-const SPDY = require("libp2p-spdy");
-const WS = require("libp2p-websockets");
+const path = require("path");
+const LibP2pBundle = require(path.join(__dirname, "libp2p-bundle.js"));
 const PeerInfo = require("peer-info");
-// const Gossipsub = require("libp2p-gossipsub");
-// const FloodSub = require("libp2p-floodsub");
-const defaultsDeep = require("@nodeutils/defaults-deep");
-
 const { promisify } = require("util");
 
-const libp2p = require("libp2p");
+const boostrapNodes = process.argv.slice(2);
 
-class MyBundle extends libp2p {
-  constructor(_options) {
-    const defaults = {
-      modules: {
-        transport: [TCP, WS],
-        streamMuxer: [Mplex, SPDY],
-        peerDiscovery: [Bootstrap],
-        // connEncryption: [SECIO],
-        dht: KadDHT
-      },
-      config: {
-        dht: {
-          kBucketSize: 20
-        },
-        EXPERIMENTAL: {
-          dht: true,
-          pubsub: true
-        },
-        peerDiscovery: {
-          // autoDial: true, // TODO check
-          bootstrap: {
-            interval: 2000,
-            enabled: true,
-            list: boostrapNodes
-          }
-        }
-      }
-    };
-
-    super(defaultsDeep(_options, defaults));
-  }
+for (const node of boostrapNodes) {
+  console.error("boostrap_node\t" + node);
 }
 
 (async () => {
   const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
   const peerInfo = await PeerInfoCreate();
   // TODO catch PeerInfoCreate
-
   peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
 
-  const node = new MyBundle({ peerInfo });
+  const node = new LibP2pBundle({
+    peerInfo,
+    config: {
+      peerDiscovery: {
+        bootstrap: {
+          list: boostrapNodes
+        }
+      }
+    }
+  });
 
   const nodeStart = promisify(node.start).bind(node);
   await nodeStart();
   // No need to try/catch. Let it throw.
 
-  console.log(`my_libp2p_id\t${node.peerInfo.id.toB58String()}`);
+  console.error(`my_libp2p_id\t${node.peerInfo.id.toB58String()}`);
 
   node.on("peer:discovery", async peerInfo => {
     const nodeDial = promisify(node.dial).bind(node);
@@ -76,22 +41,32 @@ class MyBundle extends libp2p {
   });
 
   node.on("peer:connect", peerInfo => {
-    console.log("peer:connect\t" + peerInfo.id.toB58String());
-
-    node.pubsub.subscribe(
-      "/taskresults/0.1",
-      msg => {
-        console.log("/taskresults/0.1", msg.from, msg.data.toString());
-      },
-      () => {}
-    );
-
-    node.pubsub.subscribe(
-      "/broadcast/0.1",
-      msg => {
-        console.log("/broadcast/0.1", msg.from, msg.data.toString());
-      },
-      () => {}
-    );
+    console.error("peer:connect\t" + peerInfo.id.toB58String());
   });
+
+  const topics = ["/taskresults/0.1", "/broadcast/0.1"];
+
+  for (const topic of topics) {
+    node.pubsub.subscribe(
+      topic,
+      msg => {
+        console.log(
+          JSON.stringify({
+            date: new Date().toJSON(),
+            libp2p_sender: msg.from,
+            msg: JSON.parse(msg.data.toString())
+          })
+        );
+      },
+      () => {}
+    );
+  }
+
+  // setInterval(async () => {
+  //   const x = await promisify(node.pubsub.peers)("/broadcast/0.1");
+  //   // This only gets from neighbors
+  //   // Need to find a way to get from evry node
+
+  //   console.log(new Date().toJSON(), x.length);
+  // }, 1000);
 })();
