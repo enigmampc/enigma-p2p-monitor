@@ -9,6 +9,7 @@ Monitor chatter on the Enigma network
    ```bash
    git clone https://github.com/enigmampc/enigma-p2p.git
    cd enigma-p2p
+   npm install
    node src/cli/cli_app.js -n dns -i B1 -b B1 -p B1
    ```
 
@@ -21,6 +22,7 @@ Monitor chatter on the Enigma network
    ```bash
    git clone https://github.com/enigmampc/enigma-p2p-monitor.git
    cd enigma-p2p-monitor
+   yarn install
    node main.js "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm"
    ```
 
