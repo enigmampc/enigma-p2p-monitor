@@ -4,9 +4,23 @@ const path = require("path");
 const LibP2pBundle = require(path.join(__dirname, "libp2p-bundle.js"));
 const PeerInfo = require("peer-info");
 const { promisify } = require("util");
+const flags = require("flags");
 
-const boostrapNodes = process.argv.slice(2);
+flags.defineStringList("bootstrap", []);
+flags.defineString("enigma-contract-address", null);
 
+flags.parse();
+
+const enigmaContractAddress = flags.get("enigma-contract-address");
+const web3 = !enigmaContractAddress
+  ? null
+  : (() => {
+      const Web3 = require("web3");
+      const web3Provider = new Web3.providers.WebsocketProvider("ws://127.0.0.1:9545");
+      return new Web3(web3Provider);
+    })();
+
+const boostrapNodes = flags.get("bootstrap");
 for (const node of boostrapNodes) {
   console.error("boostrap_node\t" + node);
 }
