@@ -73,6 +73,7 @@ Monitor chatter on the Enigma network
     ```
 
 7.  Inside the `enigma-p2p-monitor` node you'll see:
+
     ![demo](/demo.gif)
 
 # CLI options
