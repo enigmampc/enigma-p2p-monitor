@@ -91,17 +91,23 @@ if (boostrapNodes.length === 0) {
       return;
     }
     this.subscribed.add(topic);
-    console.error("pubsub_subscribe\t" + topic);
+    console.error("subscribe\t" + topic);
 
     node.pubsub.subscribe(
       topic,
       msg => {
+        try {
+          msg = JSON.parse(msg.data.toString());
+        } catch {
+          msg = msg.data.toString();
+        }
+
         console.log(
           JSON.stringify({
             date: new Date().toJSON(),
             libp2p_sender: msg.from,
-            topic: topic,
-            msg: JSON.parse(msg.data.toString())
+            topic,
+            msg
           })
         );
       },
