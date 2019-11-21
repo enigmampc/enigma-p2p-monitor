@@ -38,8 +38,9 @@ if (boostrapNodes.length === 0) {
 }
 
 (async () => {
-  // Connect to p2p network
+  // Join the p2p network
 
+  // Init peer
   const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
   const peerInfo = await PeerInfoCreate(); // No need to try/catch. Let it throw.
   peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
@@ -55,6 +56,7 @@ if (boostrapNodes.length === 0) {
     }
   });
 
+  // Init out peer
   const nodeStart = promisify(node.start).bind(node);
   await nodeStart(); // No need to try/catch. Let it throw.
 
@@ -64,6 +66,7 @@ if (boostrapNodes.length === 0) {
     console.error(`my_multiaddr\t${multiaddr.toString()}`);
   }
 
+  // When we find new peers, connect with them
   const nodeDial = promisify(node.dial).bind(node);
   node.on("peer:discovery", async peerInfo => {
     try {
@@ -82,6 +85,7 @@ if (boostrapNodes.length === 0) {
     console.error("peer:disconnect\t" + peerInfo.id.toB58String());
   });
 
+  // Subscribe to messages on the libp2p pubsub network
   function subscribe(topic) {
     if (!this.subscribed) {
       this.subscribed = new Set();
@@ -115,6 +119,7 @@ if (boostrapNodes.length === 0) {
     );
   }
 
+  // General topics
   subscribe("/broadcast/0.1");
   subscribe("/taskresults/0.1");
 
