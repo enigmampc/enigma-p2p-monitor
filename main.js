@@ -21,7 +21,7 @@ flags.defineString("web3-provider", "ws://localhost:9545", "URL of the web3 prov
 
 flags.parse();
 
-const web3 = new Web3(new ProviderResolver().resolve(flags.get("web3-provider")));
+const web3 = new Web3(new Web3.providers.WebsocketProvider(flags.get("web3-provider")));
 
 const enigmaContractAddress = flags.get("enigma-contract-address");
 const enigmaContractABI = JSON.parse(fs.readFileSync(flags.get("enigma-contract-json-path"), "utf8")).abi;
@@ -38,6 +38,8 @@ if (boostrapNodes.length === 0) {
 }
 
 (async () => {
+  // Connect to p2p network
+
   const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
   const peerInfo = await PeerInfoCreate(); // No need to try/catch. Let it throw.
   peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
@@ -80,9 +82,17 @@ if (boostrapNodes.length === 0) {
     console.error("peer:disconnect\t" + peerInfo.id.toB58String());
   });
 
-  const topics = ["/taskresults/0.1", "/broadcast/0.1"];
+  function subscribe(topic) {
+    if (!this.subscribed) {
+      this.subscribed = new Set();
+    }
 
-  for (const topic of topics) {
+    if (this.subscribed.has(topic)) {
+      return;
+    }
+    this.subscribed.add(topic);
+    console.error("pubsub_subscribe\t" + topic);
+
     node.pubsub.subscribe(
       topic,
       msg => {
@@ -90,6 +100,7 @@ if (boostrapNodes.length === 0) {
           JSON.stringify({
             date: new Date().toJSON(),
             libp2p_sender: msg.from,
+            topic: topic,
             msg: JSON.parse(msg.data.toString())
           })
         );
@@ -98,11 +109,24 @@ if (boostrapNodes.length === 0) {
     );
   }
 
-  // setInterval(async () => {
-  //   const x = await promisify(node.pubsub.peers)("/broadcast/0.1");
-  //   // This only gets from neighbors
-  //   // Need to find a way to get from evry node
+  subscribe("/broadcast/0.1");
+  subscribe("/taskresults/0.1");
 
-  //   console.log(new Date().toJSON(), x.length);
-  // }, 1000);
+  let ethBlockNumber = 0;
+  setInterval(async () => {
+    // Every 1 second get new registered SGX public key
+    // Then subscribe to messages ot its pubsub topic
+
+    const fromBlock = ethBlockNumber;
+    ethBlockNumber = await web3.eth.getBlockNumber();
+
+    // Get new Registered workers
+    const newWorkerRegisteredEvents = await enigmaContract.getPastEvents("Registered", {
+      fromBlock
+    });
+
+    for (const event of newWorkerRegisteredEvents) {
+      subscribe(event.returnValues.signer);
+    }
+  }, 1000);
 })();
