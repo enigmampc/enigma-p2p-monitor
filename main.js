@@ -99,10 +99,11 @@ if (boostrapNodes.length === 0) {
       msg => {
         const libp2p_sender = msg.from;
 
+        let msgData;
         try {
-          msg = JSON.parse(msg.data.toString());
+          msgData = JSON.parse(msg.data.toString());
         } catch {
-          msg = msg.data.toString();
+          msgData = msg.data.toString();
         }
 
         console.log(
@@ -110,7 +111,7 @@ if (boostrapNodes.length === 0) {
             date: new Date().toJSON(),
             libp2p_sender,
             topic,
-            msg
+            msg: msgData
           })
         );
       },
