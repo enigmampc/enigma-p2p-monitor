@@ -36,3 +36,20 @@ Monitor chatter on the Enigma network
 
 4. Inside the `enigma-p2p-monitor` node you'll see:
    ![demo](/demo.gif)
+
+# CLI options
+
+```bash
+$ node main.js --help
+Usage: node main.js [options]
+
+Options:
+  --bootstrap: Comma separated list of bootstrap nodes libp2p multiaddr.
+    (default: [])
+  --enigma-contract-address: Ethereum address of the Enigma smart contract.
+    (default: null)
+  --enigma-contract-json-path: Path to the compiled JSON file of the Enigma smart contract.
+    (default: null)
+  --web3-provider: URL of the web3 provider.
+    (default: "ws://localhost:9545")
+```
