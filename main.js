@@ -1,24 +1,31 @@
 #!/usr/bin/env node
 
 const path = require("path");
+const fs = require("fs");
 const LibP2pBundle = require(path.join(__dirname, "libp2p-bundle.js"));
 const PeerInfo = require("peer-info");
 const { promisify } = require("util");
 const flags = require("flags");
+const Web3 = require("web3");
+const { ProviderResolver } = require("web3-providers");
 
-flags.defineStringList("bootstrap", []);
-flags.defineString("enigma-contract-address", null);
+const socketProviderAdapter = new ProviderResolver().resolve("ws://localhost:8546");
+
+// TODO: By default get enigmaContractAddress from an official source
+// TODO: By default get enigmaContractABI from an official source
+// TODO: Maybe use infura.io free tier as the default web3 provider?
+flags.defineStringList("bootstrap", [], "Comma separated list of bootstrap nodes libp2p multiaddr.");
+flags.defineString("enigma-contract-address", null, "Ethereum address of the Enigma smart contract.");
+flags.defineString("enigma-contract-json-path", null, "Path to the compiled JSON file of the Enigma smart contract.");
+flags.defineString("web3-provider", "ws://localhost:9545", "URL of the web3 provider.");
 
 flags.parse();
 
+const web3 = new Web3(new ProviderResolver().resolve(flags.get("web3-provider")));
+
 const enigmaContractAddress = flags.get("enigma-contract-address");
-const web3 = !enigmaContractAddress
-  ? null
-  : (() => {
-      const Web3 = require("web3");
-      const web3Provider = new Web3.providers.WebsocketProvider("ws://127.0.0.1:9545");
-      return new Web3(web3Provider);
-    })();
+const enigmaContractABI = JSON.parse(fs.readFileSync(flags.get("enigma-contract-json-path"), "utf8")).abi;
+const enigmaContract = new web3.eth.Contract(enigmaContractABI, enigmaContractAddress);
 
 const boostrapNodes = flags.get("bootstrap");
 for (const node of boostrapNodes) {
