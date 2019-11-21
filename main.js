@@ -25,6 +25,11 @@ for (const node of boostrapNodes) {
   console.error("boostrap_node\t" + node);
 }
 
+if (boostrapNodes.length === 0) {
+  console.error("Must enter at least one bootstrap node. Exiting.");
+  process.exit(1);
+}
+
 (async () => {
   const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
   const peerInfo = await PeerInfoCreate(); // No need to try/catch. Let it throw.
