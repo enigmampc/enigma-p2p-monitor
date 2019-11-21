@@ -97,6 +97,8 @@ if (boostrapNodes.length === 0) {
     node.pubsub.subscribe(
       topic,
       msg => {
+        const libp2p_sender = msg.from;
+
         try {
           msg = JSON.parse(msg.data.toString());
         } catch {
@@ -106,7 +108,7 @@ if (boostrapNodes.length === 0) {
         console.log(
           JSON.stringify({
             date: new Date().toJSON(),
-            libp2p_sender: msg.from,
+            libp2p_sender,
             topic,
             msg
           })
