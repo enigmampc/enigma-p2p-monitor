@@ -66,7 +66,7 @@ Monitor chatter on the Enigma network
 
     It'll now connect to the `enigma-p2p` bootstrap node.
 
-6.  Inside one of the `enigma-p2p` workers terminal, execute:
+6.  Inside one of the `enigma-p2p` workers terminal, run:
 
     ```bash
     broadcast banana
