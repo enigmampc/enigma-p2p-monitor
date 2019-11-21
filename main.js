@@ -123,21 +123,9 @@ if (boostrapNodes.length === 0) {
   subscribe("/broadcast/0.1");
   subscribe("/taskresults/0.1");
 
-  let ethBlockNumber = 0;
-  setInterval(async () => {
-    // Every 1 second get new registered SGX public key
-    // Then subscribe to messages ot its pubsub topic
-
-    const fromBlock = ethBlockNumber;
-    ethBlockNumber = await web3.eth.getBlockNumber();
-
-    // Get new Registered workers
-    const newWorkerRegisteredEvents = await enigmaContract.getPastEvents("Registered", {
-      fromBlock
-    });
-
-    for (const event of newWorkerRegisteredEvents) {
-      subscribe(event.returnValues.signer);
-    }
-  }, 1000);
+  // Workers topics
+  enigmaContract.events
+    .Registered({ fromBlock: 0 })
+    .on("data", event => subscribe(event.returnValues.signer))
+    .on("error", console.error);
 })();
