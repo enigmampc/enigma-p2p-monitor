@@ -19,7 +19,7 @@ Options:
     (default: "ws://localhost:9545")
 ```
 
-# Usage
+# Usage Example
 
 ## 1. Clone the `enigma-p2p` repo & install dependencies:
 
