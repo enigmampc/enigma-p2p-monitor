@@ -7,9 +7,6 @@ const PeerInfo = require("peer-info");
 const { promisify } = require("util");
 const flags = require("flags");
 const Web3 = require("web3");
-const { ProviderResolver } = require("web3-providers");
-
-const socketProviderAdapter = new ProviderResolver().resolve("ws://localhost:8546");
 
 // TODO: By default get enigmaContractAddress from an official source
 // TODO: By default get enigmaContractABI from an official source
