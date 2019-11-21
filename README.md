@@ -72,6 +72,10 @@ Monitor chatter on the Enigma network
     broadcast banana
     ```
 
+    ```bash
+    broadcast papaya
+    ```
+
 7.  Inside the `enigma-p2p-monitor` node you'll see:
 
     ![demo](/demo.gif)
