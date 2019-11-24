@@ -7,6 +7,7 @@ const PeerInfo = require("peer-info");
 const { promisify } = require("util");
 const flags = require("flags");
 const Web3 = require("web3");
+const msgpack = require("msgpack-lite");
 
 // TODO: By default get enigmaContractAddress from an official source
 // TODO: By default get enigmaContractABI from an official source
@@ -102,8 +103,12 @@ if (boostrapNodes.length === 0) {
         let msgData;
         try {
           msgData = JSON.parse(msg.data.toString());
-        } catch {
-          msgData = msg.data.toString();
+        } catch (e) {
+          try {
+            msgData = msgpack.decode(msg.data);
+          } catch (e) {
+            msgData = msg.data.toString();
+          }
         }
 
         console.log(
