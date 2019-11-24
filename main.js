@@ -126,6 +126,6 @@ if (boostrapNodes.length === 0) {
   // Workers topics
   enigmaContract.events
     .Registered({ fromBlock: 0 })
-    .on("data", event => subscribe(event.returnValues.signer))
+    .on("data", event => subscribe(event.returnValues.signer.replace(/^0x/, "").toLowerCase()))
     .on("error", console.error);
 })();
