@@ -9,7 +9,7 @@
     "url": "https://github.com/enigmampc/enigma-p2p-monitor.git"
   },
   "scripts": {
-    "test": "jest --runInBand"
+    "test": "mocha test.js"
   },
   "dependencies": {
     "@nodeutils/defaults-deep": "^1.1.0",
@@ -26,9 +26,6 @@
     "web3": "^1.2.4"
   },
   "devDependencies": {
-    "jest": "^24.9.0"
-  },
-  "jest": {
-    "testEnvironment": "node"
+    "mocha": "^6.2.2"
   }
 }
