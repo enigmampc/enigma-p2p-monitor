@@ -24,9 +24,8 @@ Options:
 ## 1. Clone the `enigma-p2p` repo & install dependencies:
 
 ```bash
-git clone https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p
+git clone -b develop --single-branch https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p
 cd /tmp/enigma-p2p
-git checkout develop
 npm install
 
 npm install truffle
