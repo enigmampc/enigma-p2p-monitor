@@ -60,6 +60,10 @@ Note:
 > `B1` is [hard coded](https://github.com/enigmampc/enigma-p2p/blob/ada81f91111ec9f4a83c2abae21210776db54a4e/test/singleConfig/id-l.json) for debugging and testing purposes.
 > It's libp2p ID is `QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm` and it [listens to port `tcp/10300`](https://github.com/enigmampc/enigma-p2p/blob/c30ed1e82853a793c9453a79efeb654ee77dec38/configs/debug.json#L2).
 
+Note:
+
+> To skip the next step we could also run the bootstrap node with `--lonely-node`, which'll make it register without waiting for another node in the network.
+
 ## 4. In a new terminal, Run another `enigma-p2p` worker and connect it with the bootstrap node:
 
 ```bash
@@ -70,6 +74,10 @@ node src/cli/cli_app.js -b "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEH
 Note:
 
 > It's also possible to use `-b B1` instead of `-b "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm"`.
+
+Note:
+
+> To skip this step we could also run the bootstrap node with `--lonely-node`, which'll make it register without waiting for another node in the network.
 
 ## 5. In a new terminal, Run an `enigma-p2p-monitor` node:
 
