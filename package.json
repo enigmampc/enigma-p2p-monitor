@@ -9,7 +9,7 @@
     "url": "https://github.com/enigmampc/enigma-p2p-monitor.git"
   },
   "scripts": {
-    "test": "mocha test.js"
+    "test": "./init_enigma-p2p.sh && mocha test.js"
   },
   "dependencies": {
     "@nodeutils/defaults-deep": "^1.1.0",
