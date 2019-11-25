@@ -306,30 +306,34 @@ it("receive message from a subscribed topic", function() {
   ]);
   killList.push(monitor);
 
-  const broadcastMsg = Date.now();
+  return new Promise(resolve => {
+    const broadcastMsg = Date.now();
 
-  monitor.stderr.on("data", async data => {
-    data = data.toString();
-    if (data.includes("peer:connect\tQmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm")) {
-      bootstrap.stdin.write(`broadcast ${broadcastMsg}\n`, "utf-8");
-      bootstrap.stdin.end();
-    }
-  });
-
-  return new Promise((resolve, reject) => {
     monitor.stdout.on("data", async data => {
-      try {
-        data = JSON.parse(data.toString().trim());
-      } catch (e) {
-        reject(e);
-        return;
-      }
+      const msg = JSON.parse(data.toString().trim());
 
-      assert("date" in data);
-      assert.equal(data.libp2p_sender, "QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm");
-      assert.equal(data.topic, "/broadcast/0.1");
-      assert.equal(data.msg, broadcastMsg);
+      assert("date" in msg);
+      assert.equal(msg.libp2p_sender, "QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm");
+      assert.equal(msg.topic, "/broadcast/0.1");
+      assert.equal(msg.msg, broadcastMsg);
       resolve();
+    });
+
+    let lastLog;
+    bootstrap.stdout.on("data", async data => {
+      lastLog = Date.now();
+
+      const log = data.toString();
+      if (log.includes("new peer :")) {
+        const interval = setInterval(() => {
+          if (Date.now() > lastLog + 1000) {
+            // One second passed since the last log
+            // So probably the bootstrap node is done setting up
+            clearInterval(interval);
+            bootstrap.stdin.write(`broadcast ${broadcastMsg}\n`, "utf-8");
+          }
+        }, 100);
+      }
     });
   });
 }, 60000);
