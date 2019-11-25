@@ -2,6 +2,8 @@
 
 Monitor chatter on the Enigma network.
 
+[![Build Status](https://travis-ci.org/enigmampc/enigma-p2p-monitor.svg?branch=master)](https://travis-ci.org/enigmampc/enigma-p2p-monitor)
+
 # CLI Options
 
 ```bash
