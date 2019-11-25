@@ -9,13 +9,7 @@ let account;
 before(async function() {
   this.timeout(120000);
 
-  if (!fs.existsSync("/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json")) {
-    await exec(`rm -rf /tmp/enigma-p2p`);
-    await exec(`git clone -b develop --single-branch https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p`);
-    await exec(`npm install`, { cwd: "/tmp/enigma-p2p" });
-    await exec(`npm install truffle`, { cwd: "/tmp/enigma-p2p" });
-    await exec(`rm -rf build && npx truffle compile`, { cwd: "/tmp/enigma-p2p/test/ethereum/scripts" });
-  }
+  await exec(`./init_enigma-p2p.sh`);
 
   truffleDevelopProcess = spawn("npx", ["truffle", "develop"], { cwd: "/tmp/enigma-p2p/test/ethereum/scripts" });
   return new Promise(async resolve => {
