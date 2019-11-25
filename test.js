@@ -1,6 +1,6 @@
 const { spawn } = require("child_process");
-const exec = require("util").promisify(require("child_process").exec);
-const fs = require("fs");
+const { promisify } = require("util");
+const exec = promisify(require("child_process").exec);
 const assert = require("assert");
 
 let truffleDevelopProcess;
@@ -271,3 +271,65 @@ describe("start before bootstrap", function() {
     });
   });
 });
+
+it("receive message from a subscribed topic", function() {
+  this.timeout(60000);
+  const bootstrap = spawn(
+    "node",
+    [
+      "src/cli/cli_app.js",
+      "-i",
+      "B1",
+      "-p",
+      "B1",
+      "--auto-init",
+      "--mock-core",
+      "--core",
+      "127.0.0.1:3456",
+      "--ethereum-address",
+      account,
+      "--ethereum-contract-address",
+      enigmaContractAddress
+    ],
+    { cwd: "/tmp/enigma-p2p" }
+  );
+  killList.push(bootstrap);
+
+  const monitor = spawn("node", [
+    "main.js",
+    "--bootstrap",
+    "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm",
+    "--enigma-contract-json-path",
+    "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json",
+    "--enigma-contract-address",
+    enigmaContractAddress
+  ]);
+  killList.push(monitor);
+
+  const broadcastMsg = Date.now();
+
+  monitor.stderr.on("data", async data => {
+    data = data.toString();
+    if (data.includes("peer:connect\tQmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm")) {
+      bootstrap.stdin.write(`broadcast ${broadcastMsg}\n`, "utf-8");
+      bootstrap.stdin.end();
+    }
+  });
+
+  return new Promise((resolve, reject) => {
+    monitor.stdout.on("data", async data => {
+      try {
+        data = JSON.parse(data.toString().trim());
+      } catch (e) {
+        reject(e);
+        return;
+      }
+
+      assert("date" in data);
+      assert.equal(data.libp2p_sender, "QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm");
+      assert.equal(data.topic, "/broadcast/0.1");
+      assert.equal(data.msg, broadcastMsg);
+      resolve();
+    });
+  });
+}, 60000);
