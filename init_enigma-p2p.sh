@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -xe
+
 if [[ -f "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json" ]]; then
     exit
 fi
