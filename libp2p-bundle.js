@@ -15,7 +15,7 @@ class LibP2pBundle extends libp2p {
         transport: [TCP, WS],
         streamMuxer: [Mplex, SPDY],
         peerDiscovery: [Bootstrap],
-        // connEncryption: [SECIO],
+        connEncryption: [SECIO],
         dht: KadDHT
       },
       config: {
