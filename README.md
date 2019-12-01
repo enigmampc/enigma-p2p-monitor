@@ -39,7 +39,7 @@ npx truffle develop
 This will print to the screen an accounts list. We'll chose one and call it `$ETHEREUM_ACCOUNT`.
 This is so that our workers will have gas to make transactions on the Ethereum blockchain (E.g. registering as a worker, deploying secret contracts, etc.)
 
-## 2. In a new terminal, deploy the Enigma contract and get it's address:
+## 2. In a new terminal, deploy the Enigma contract and get its address:
 
 ```bash
 cd /tmp/enigma-p2p/test/ethereum/scripts
@@ -65,7 +65,7 @@ Note:
 
 > To skip the next step we could also run the bootstrap node with `--lonely-node`, which'll make it register without waiting for another node in the network.
 
-## 4. In a new terminal, Run another `enigma-p2p` worker and connect it with the bootstrap node:
+## 4. In a new terminal, run another `enigma-p2p` worker and connect it with the bootstrap node:
 
 ```bash
 cd /tmp/enigma-p2p
@@ -80,7 +80,7 @@ Note:
 
 > To skip this step we could also run the bootstrap node with `--lonely-node`, which'll make it register without waiting for another node in the network.
 
-## 5. In a new terminal, Run an `enigma-p2p-monitor` node:
+## 5. In a new terminal, run an `enigma-p2p-monitor` node:
 
 ```bash
 git clone https://github.com/enigmampc/enigma-p2p-monitor.git /tmp/enigma-p2p-monitor
@@ -89,7 +89,7 @@ yarn install
 node main.js --bootstrap "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm"  --enigma-contract-json-path "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json" --enigma-contract-address "$ENIGMA_CONTRACT_ADDRESS"
 ```
 
-It'll now connect to the `enigma-p2p` bootstrap node.
+It'll now connect to the `enigma-p2p` nodes.
 
 ## 6. Inside one of the `enigma-p2p` workers terminal, run:
 
