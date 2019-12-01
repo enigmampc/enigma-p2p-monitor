@@ -30,7 +30,6 @@ git clone -b develop --single-branch https://github.com/enigmampc/enigma-p2p.git
 cd /tmp/enigma-p2p
 npm install
 
-npm install truffle
 cd test/ethereum/scripts
 rm -rf build
 npx truffle compile
