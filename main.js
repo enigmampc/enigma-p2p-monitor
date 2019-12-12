@@ -22,7 +22,27 @@ flags.parse();
 const web3 = new Web3(new Web3.providers.WebsocketProvider(flags.get("web3-provider")));
 
 const enigmaContractAddress = flags.get("enigma-contract-address");
-const enigmaContractABI = JSON.parse(fs.readFileSync(flags.get("enigma-contract-json-path"), "utf8")).abi;
+if (enigmaContractAddress == null) {
+  console.error("Must enter a valid --enigma-contract-address. Exiting.");
+  process.exit(1);
+}
+
+const enigmaContractJSONPath = flags.get("enigma-contract-json-path");
+if (enigmaContractJSONPath == null) {
+  console.error("Must enter a valid --enigma-contract-json-path. Exiting.");
+  process.exit(1);
+}
+
+let enigmaContractABI;
+try {
+  enigmaContractABI = JSON.parse(fs.readFileSync(enigmaContractJSONPath, "utf8")).abi;
+} catch (err) {
+  console.error(
+    `Error readig the "abi" field from the JSON file "${enigmaContractJSONPath}" given to --enigma-contract-json-path. Exiting.`
+  );
+  process.exit(1);
+}
+
 const enigmaContract = new web3.eth.Contract(enigmaContractABI, enigmaContractAddress);
 
 const boostrapNodes = flags.get("bootstrap");
@@ -31,7 +51,7 @@ for (const node of boostrapNodes) {
 }
 
 if (boostrapNodes.length === 0) {
-  console.error("Must enter at least one bootstrap node. Exiting.");
+  console.error("Must enter at least one --bootstrap node. Exiting.");
   process.exit(1);
 }
 
