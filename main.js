@@ -58,7 +58,7 @@ if (boostrapNodes.length === 0) {
 (async () => {
   // Join the p2p network
 
-  // Init peer
+  // Init libp2p peer
   let node;
   try {
     const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
@@ -75,14 +75,13 @@ if (boostrapNodes.length === 0) {
         }
       }
     });
+
+    const nodeStart = promisify(node.start).bind(node);
+    await nodeStart();
   } catch (err) {
     console.error(`Error initializing libp2p node: "${err.message}". Exiting.`);
     process.exit(1);
   }
-
-  // Init out peer
-  const nodeStart = promisify(node.start).bind(node);
-  await nodeStart(); // No need to try/catch. Let it throw.
 
   console.error(`my_libp2p_id\t${node.peerInfo.id.toB58String()}`);
 
