@@ -320,11 +320,11 @@ it("receive message from a subscribed topic", function() {
     });
 
     let lastLog;
-    bootstrap.stdout.on("data", async data => {
+    monitor.stderr.on("data", async data => {
       lastLog = Date.now();
 
       const log = data.toString();
-      if (log.includes("new peer :")) {
+      if (log.includes("peer:connect")) {
         const interval = setInterval(() => {
           if (Date.now() > lastLog + 1000) {
             // One second passed since the last log
