@@ -89,16 +89,25 @@ if (boostrapNodes.length === 0) {
     console.error(`my_multiaddr\t${multiaddr.toString()}`);
   }
 
-  // When we find new peers, connect with them
-  const nodeDial = promisify(node.dial).bind(node);
-  node.on("peer:discovery", async peerInfo => {
-    try {
-      await nodeDial(peerInfo);
-    } catch (e) {
-      // Discovered a peer but couldn't connect.
-      // Will try again in ${peerDiscovery.bootstrap.interval}ms time
-    }
-  });
+  // When we find a bootstrap, connect with them.
+  // The DHT will take care of connecting us to the other peers
+  {
+    let connected = false;
+    node.on("peer:discovery", async peerInfo => {
+      if (connected) {
+        return;
+      }
+
+      const nodeDial = promisify(node.dial).bind(node);
+      try {
+        await nodeDial(peerInfo);
+        connected = true;
+      } catch (e) {
+        // Discovered a peer but couldn't connect.
+        // Will try again in ${peerDiscovery.bootstrap.interval}ms time
+      }
+    });
+  }
 
   node.on("peer:connect", peerInfo => {
     console.error("peer:connect\t" + peerInfo.id.toB58String());
