@@ -26,7 +26,7 @@ Options:
 ## 1. Clone the `enigma-p2p` repo & install dependencies:
 
 ```bash
-git clone -b develop --single-branch https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p
+git clone --single-branch -b develop --depth 1 https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p
 cd /tmp/enigma-p2p
 npm install
 
