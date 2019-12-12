@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const path = require("path");
-const fs = require("fs");
 const LibP2pBundle = require(path.join(__dirname, "libp2p-bundle.js"));
 const PeerInfo = require("peer-info");
 const { promisify } = require("util");
@@ -35,7 +34,7 @@ if (enigmaContractJSONPath == null) {
 
 let enigmaContractABI;
 try {
-  enigmaContractABI = JSON.parse(fs.readFileSync(enigmaContractJSONPath, "utf8")).abi;
+  enigmaContractABI = require(enigmaContractJSONPath).abi;
 } catch (err) {
   console.error(
     `Error readig the "abi" field from the JSON file "${enigmaContractJSONPath}" given to --enigma-contract-json-path. Exiting.`
