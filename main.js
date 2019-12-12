@@ -158,11 +158,10 @@ if (boostrapNodes.length === 0) {
     );
   }
 
-  // General topics
-  subscribe("/broadcast/0.1");
-  subscribe("/taskresults/0.1");
+  // Subscribe to public topics
+  require(path.join(__dirname, "public_topics.json")).forEach(t => subscribe(t));
 
-  // Workers topics
+  // Subscribe to workers topics
   enigmaContract.events
     .Registered({ fromBlock: 0 })
     .on("data", event => subscribe(event.returnValues.signer.replace(/^0x/, "").toLowerCase()))
