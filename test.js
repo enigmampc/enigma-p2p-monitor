@@ -88,7 +88,7 @@ it("subscribe to /broadcast/0.1 and /taskresult/0.1", function() {
       }
     });
   });
-}, 60000);
+});
 
 describe("start after bootstrap", function() {
   this.timeout(60000);
@@ -336,4 +336,4 @@ it("receive message from a subscribed topic", function() {
       }
     });
   });
-}, 60000);
+});
