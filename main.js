@@ -34,7 +34,7 @@ if (enigmaContractJSONPath == null) {
 
 let enigmaContractABI;
 try {
-  enigmaContractABI = require(enigmaContractJSONPath).abi;
+  enigmaContractABI = require(path.resolve(enigmaContractJSONPath)).abi;
 } catch (err) {
   console.error(
     `Error readig the "abi" field from the JSON file "${enigmaContractJSONPath}" given to --enigma-contract-json-path. Exiting.`
