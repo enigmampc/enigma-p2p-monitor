@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const path = require("path");
-const fs = require("fs");
 const LibP2pBundle = require(path.join(__dirname, "libp2p-bundle.js"));
 const PeerInfo = require("peer-info");
 const { promisify } = require("util");
@@ -22,7 +21,27 @@ flags.parse();
 const web3 = new Web3(new Web3.providers.WebsocketProvider(flags.get("web3-provider")));
 
 const enigmaContractAddress = flags.get("enigma-contract-address");
-const enigmaContractABI = JSON.parse(fs.readFileSync(flags.get("enigma-contract-json-path"), "utf8")).abi;
+if (enigmaContractAddress == null) {
+  console.error("Must enter a valid --enigma-contract-address. Exiting.");
+  process.exit(1);
+}
+
+const enigmaContractJSONPath = flags.get("enigma-contract-json-path");
+if (enigmaContractJSONPath == null) {
+  console.error("Must enter a valid --enigma-contract-json-path. Exiting.");
+  process.exit(1);
+}
+
+let enigmaContractABI;
+try {
+  enigmaContractABI = require(enigmaContractJSONPath).abi;
+} catch (err) {
+  console.error(
+    `Error readig the "abi" field from the JSON file "${enigmaContractJSONPath}" given to --enigma-contract-json-path. Exiting.`
+  );
+  process.exit(1);
+}
+
 const enigmaContract = new web3.eth.Contract(enigmaContractABI, enigmaContractAddress);
 
 const boostrapNodes = flags.get("bootstrap");
@@ -31,32 +50,37 @@ for (const node of boostrapNodes) {
 }
 
 if (boostrapNodes.length === 0) {
-  console.error("Must enter at least one bootstrap node. Exiting.");
+  console.error("Must enter at least one --bootstrap node. Exiting.");
   process.exit(1);
 }
 
 (async () => {
   // Join the p2p network
 
-  // Init peer
-  const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
-  const peerInfo = await PeerInfoCreate(); // No need to try/catch. Let it throw.
-  peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
+  // Init libp2p peer
+  let node;
+  try {
+    const PeerInfoCreate = promisify(PeerInfo.create).bind(PeerInfo);
+    const peerInfo = await PeerInfoCreate();
+    peerInfo.multiaddrs.add("/ip4/0.0.0.0/tcp/0");
 
-  const node = new LibP2pBundle({
-    peerInfo,
-    config: {
-      peerDiscovery: {
-        bootstrap: {
-          list: boostrapNodes
+    node = new LibP2pBundle({
+      peerInfo,
+      config: {
+        peerDiscovery: {
+          bootstrap: {
+            list: boostrapNodes
+          }
         }
       }
-    }
-  });
+    });
 
-  // Init out peer
-  const nodeStart = promisify(node.start).bind(node);
-  await nodeStart(); // No need to try/catch. Let it throw.
+    const nodeStart = promisify(node.start).bind(node);
+    await nodeStart();
+  } catch (err) {
+    console.error(`Error initializing libp2p node: "${err.message}". Exiting.`);
+    process.exit(1);
+  }
 
   console.error(`my_libp2p_id\t${node.peerInfo.id.toB58String()}`);
 
@@ -64,16 +88,25 @@ if (boostrapNodes.length === 0) {
     console.error(`my_multiaddr\t${multiaddr.toString()}`);
   }
 
-  // When we find new peers, connect with them
-  const nodeDial = promisify(node.dial).bind(node);
-  node.on("peer:discovery", async peerInfo => {
-    try {
-      await nodeDial(peerInfo);
-    } catch (e) {
-      // Discovered a peer but couldn't connect.
-      // Will try again in ${peerDiscovery.bootstrap.interval}ms time
-    }
-  });
+  // When we find a bootstrap, connect with them.
+  // The DHT will take care of connecting us to the other peers
+  {
+    let connected = false;
+    node.on("peer:discovery", async peerInfo => {
+      if (connected) {
+        return;
+      }
+
+      const nodeDial = promisify(node.dial).bind(node);
+      try {
+        await nodeDial(peerInfo);
+        connected = true;
+      } catch (e) {
+        // Discovered a peer but couldn't connect.
+        // Will try again in ${peerDiscovery.bootstrap.interval}ms time
+      }
+    });
+  }
 
   node.on("peer:connect", peerInfo => {
     console.error("peer:connect\t" + peerInfo.id.toB58String());
@@ -124,11 +157,10 @@ if (boostrapNodes.length === 0) {
     );
   }
 
-  // General topics
-  subscribe("/broadcast/0.1");
-  subscribe("/taskresults/0.1");
+  // Subscribe to public topics
+  require(path.join(__dirname, "public_topics.json")).forEach(t => subscribe(t));
 
-  // Workers topics
+  // Subscribe to workers topics
   enigmaContract.events
     .Registered({ fromBlock: 0 })
     .on("data", event => subscribe(event.returnValues.signer.replace(/^0x/, "").toLowerCase()))

@@ -26,7 +26,7 @@ Options:
 ## 1. Clone the `enigma-p2p` repo & install dependencies:
 
 ```bash
-git clone -b develop --single-branch https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p
+git clone --single-branch -b develop --depth 1 https://github.com/enigmampc/enigma-p2p.git /tmp/enigma-p2p
 cd /tmp/enigma-p2p
 npm install
 
@@ -43,7 +43,7 @@ This is so that our workers will have gas to make transactions on the Ethereum b
 
 ```bash
 cd /tmp/enigma-p2p/test/ethereum/scripts
-npx truffle migrate 2>/dev/null | grep -A 4 "Replacing 'Enigma'" | grep 'contract address' | awk '{print $NF}'
+npx truffle migrate --reset 2>/dev/null | grep -A 4 "Replacing 'Enigma'" | grep 'contract address' | awk '{print $NF}'
 ```
 
 This will deploy and print to the screen the Enigma contract address on the Ethereum blockchain.

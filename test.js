@@ -58,9 +58,33 @@ afterEach(async () => {
   killList = [];
 });
 
-it("subscribe to /broadcast/0.1 and /taskresult/0.1", function() {
-  this.timeout(60000);
+function initBootstrap({ lonely }) {
+  const bootstrap = spawn(
+    "node",
+    [
+      "src/cli/cli_app.js",
+      "-i",
+      "B1",
+      "-p",
+      "B1",
+      "--auto-init",
+      "--mock-core",
+      "--core",
+      "127.0.0.1:3456",
+      "--ethereum-address",
+      account,
+      "--ethereum-contract-address",
+      enigmaContractAddress,
+      lonely ? "--lonely-node" : undefined
+    ],
+    { cwd: "/tmp/enigma-p2p" }
+  );
+  killList.push(bootstrap);
 
+  return bootstrap;
+}
+
+function initMonitor() {
   const monitor = spawn("node", [
     "main.js",
     "--bootstrap",
@@ -71,6 +95,13 @@ it("subscribe to /broadcast/0.1 and /taskresult/0.1", function() {
     enigmaContractAddress
   ]);
   killList.push(monitor);
+  return monitor;
+}
+
+it("subscribe to /broadcast/0.1 and /taskresult/0.1", function() {
+  this.timeout(60000);
+
+  const monitor = initMonitor();
 
   return new Promise(resolve => {
     let broadcast = false;
@@ -88,43 +119,14 @@ it("subscribe to /broadcast/0.1 and /taskresult/0.1", function() {
       }
     });
   });
-}, 60000);
+});
 
 describe("start after bootstrap", function() {
   this.timeout(60000);
 
   it("connect to bootstrap", function() {
-    const bootstrap = spawn(
-      "node",
-      [
-        "src/cli/cli_app.js",
-        "-i",
-        "B1",
-        "-p",
-        "B1",
-        "--auto-init",
-        "--mock-core",
-        "--core",
-        "127.0.0.1:3456",
-        "--ethereum-address",
-        account,
-        "--ethereum-contract-address",
-        enigmaContractAddress
-      ],
-      { cwd: "/tmp/enigma-p2p" }
-    );
-    killList.push(bootstrap);
-
-    const monitor = spawn("node", [
-      "main.js",
-      "--bootstrap",
-      "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm",
-      "--enigma-contract-json-path",
-      "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json",
-      "--enigma-contract-address",
-      enigmaContractAddress
-    ]);
-    killList.push(monitor);
+    const bootstrap = initBootstrap({ lonely: false });
+    const monitor = initMonitor();
 
     return new Promise(resolve => {
       monitor.stderr.on("data", async data => {
@@ -137,38 +139,8 @@ describe("start after bootstrap", function() {
   });
 
   it("subscribe to worker topic", function() {
-    const bootstrap = spawn(
-      "node",
-      [
-        "src/cli/cli_app.js",
-        "-i",
-        "B1",
-        "-p",
-        "B1",
-        "--auto-init",
-        "--lonely-node",
-        "--mock-core",
-        "--core",
-        "127.0.0.1:3456",
-        "--ethereum-address",
-        account,
-        "--ethereum-contract-address",
-        enigmaContractAddress
-      ],
-      { cwd: "/tmp/enigma-p2p" }
-    );
-    killList.push(bootstrap);
-
-    const monitor = spawn("node", [
-      "main.js",
-      "--bootstrap",
-      "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm",
-      "--enigma-contract-json-path",
-      "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json",
-      "--enigma-contract-address",
-      enigmaContractAddress
-    ]);
-    killList.push(monitor);
+    const bootstrap = initBootstrap({ lonely: false });
+    const monitor = initMonitor();
 
     return new Promise(resolve => {
       monitor.stderr.on("data", async data => {
@@ -185,37 +157,8 @@ describe("start before bootstrap", function() {
   this.timeout(60000);
 
   it("connect to bootstrap", function() {
-    const monitor = spawn("node", [
-      "main.js",
-      "--bootstrap",
-      "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm",
-      "--enigma-contract-json-path",
-      "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json",
-      "--enigma-contract-address",
-      enigmaContractAddress
-    ]);
-    killList.push(monitor);
-
-    const bootstrap = spawn(
-      "node",
-      [
-        "src/cli/cli_app.js",
-        "-i",
-        "B1",
-        "-p",
-        "B1",
-        "--auto-init",
-        "--mock-core",
-        "--core",
-        "127.0.0.1:3456",
-        "--ethereum-address",
-        account,
-        "--ethereum-contract-address",
-        enigmaContractAddress
-      ],
-      { cwd: "/tmp/enigma-p2p" }
-    );
-    killList.push(bootstrap);
+    const monitor = initMonitor();
+    const bootstrap = initBootstrap({ lonely: false });
 
     return new Promise(resolve => {
       monitor.stderr.on("data", async data => {
@@ -228,38 +171,8 @@ describe("start before bootstrap", function() {
   });
 
   it("subscribe to worker topic", function() {
-    const monitor = spawn("node", [
-      "main.js",
-      "--bootstrap",
-      "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm",
-      "--enigma-contract-json-path",
-      "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json",
-      "--enigma-contract-address",
-      enigmaContractAddress
-    ]);
-    killList.push(monitor);
-
-    const bootstrap = spawn(
-      "node",
-      [
-        "src/cli/cli_app.js",
-        "-i",
-        "B1",
-        "-p",
-        "B1",
-        "--auto-init",
-        "--lonely-node",
-        "--mock-core",
-        "--core",
-        "127.0.0.1:3456",
-        "--ethereum-address",
-        account,
-        "--ethereum-contract-address",
-        enigmaContractAddress
-      ],
-      { cwd: "/tmp/enigma-p2p" }
-    );
-    killList.push(bootstrap);
+    const monitor = initMonitor();
+    const bootstrap = initBootstrap({ lonely: true });
 
     return new Promise(resolve => {
       monitor.stderr.on("data", async data => {
@@ -274,37 +187,9 @@ describe("start before bootstrap", function() {
 
 it("receive message from a subscribed topic", function() {
   this.timeout(60000);
-  const bootstrap = spawn(
-    "node",
-    [
-      "src/cli/cli_app.js",
-      "-i",
-      "B1",
-      "-p",
-      "B1",
-      "--auto-init",
-      "--mock-core",
-      "--core",
-      "127.0.0.1:3456",
-      "--ethereum-address",
-      account,
-      "--ethereum-contract-address",
-      enigmaContractAddress
-    ],
-    { cwd: "/tmp/enigma-p2p" }
-  );
-  killList.push(bootstrap);
 
-  const monitor = spawn("node", [
-    "main.js",
-    "--bootstrap",
-    "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm",
-    "--enigma-contract-json-path",
-    "/tmp/enigma-p2p/test/ethereum/scripts/build/contracts/Enigma.json",
-    "--enigma-contract-address",
-    enigmaContractAddress
-  ]);
-  killList.push(monitor);
+  const bootstrap = initBootstrap({ lonely: false });
+  const monitor = initMonitor();
 
   return new Promise(resolve => {
     const broadcastMsg = Date.now();
@@ -320,11 +205,11 @@ it("receive message from a subscribed topic", function() {
     });
 
     let lastLog;
-    bootstrap.stdout.on("data", async data => {
+    monitor.stderr.on("data", async data => {
       lastLog = Date.now();
 
       const log = data.toString();
-      if (log.includes("new peer :")) {
+      if (log.includes("peer:connect")) {
         const interval = setInterval(() => {
           if (Date.now() > lastLog + 1000) {
             // One second passed since the last log
@@ -336,4 +221,4 @@ it("receive message from a subscribed topic", function() {
       }
     });
   });
-}, 60000);
+});
