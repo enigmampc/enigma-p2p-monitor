@@ -104,3 +104,7 @@ broadcast papaya
 ## 7. Inside the `enigma-p2p-monitor` node you'll see:
 
 ![demo](/demo.gif)
+
+# Debugging with `docker-environment`
+
+See https://github.com/enigmampc/docker-environment/blob/debug-docs/DEBUG.md#enigma-p2p-monitor
