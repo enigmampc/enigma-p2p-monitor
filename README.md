@@ -36,7 +36,7 @@ npx truffle compile
 npx truffle develop
 ```
 
-This will print to the screen an accounts list. We'll chose one and call it `$ETHEREUM_ACCOUNT`.
+This will print to the screen an accounts list. We'll chose one and call it `$ETHEREUM_ACCOUNT` and chose another and call it `$ETHEREUM_STAKING_ACCOUNT`.
 This is so that our workers will have gas to make transactions on the Ethereum blockchain (E.g. registering as a worker, deploying secret contracts, etc.)
 
 ## 2. In a new terminal, deploy the Enigma contract and get its address:
@@ -53,7 +53,7 @@ Lets call it `$ENIGMA_CONTRACT_ADDRESS`.
 
 ```bash
 cd /tmp/enigma-p2p
-node src/cli/cli_app.js -i B1 -p B1 --auto-init --mock-core --core 127.0.0.1:3456 --ethereum-address "$ETHEREUM_ACCOUNT" --ethereum-contract-address "$ENIGMA_CONTRACT_ADDRESS"
+node src/cli/cli_app.js -i B1 -p B1 --auto-init --mock-core --core 127.0.0.1:3456 --ethereum-address "$ETHEREUM_ACCOUNT" --staking-address "$ETHEREUM_STAKING_ACCOUNT" --ethereum-contract-address "$ENIGMA_CONTRACT_ADDRESS"
 ```
 
 Note:
@@ -69,7 +69,7 @@ Note:
 
 ```bash
 cd /tmp/enigma-p2p
-node src/cli/cli_app.js -b "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm" --auto-init --mock-core --core 127.0.0.1:3456 --ethereum-address "$ETHEREUM_ACCOUNT" --ethereum-contract-address "$ENIGMA_CONTRACT_ADDRESS"
+node src/cli/cli_app.js -b "/ip4/127.0.0.1/tcp/10300/ipfs/QmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm" --auto-init --mock-core --core 127.0.0.1:3456 --ethereum-address "$ETHEREUM_ACCOUNT" --staking-address "$ETHEREUM_STAKING_ACCOUNT" --ethereum-contract-address "$ENIGMA_CONTRACT_ADDRESS"
 ```
 
 Note:
