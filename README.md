@@ -2,7 +2,7 @@
 
 Monitor chatter on the Enigma network.
 
-[![Build Status](https://travis-ci.org/enigmampc/enigma-p2p-monitor.svg?branch=master)](https://travis-ci.org/enigmampc/enigma-p2p-monitor)
+[![Build Status](https://github.com/enigmampc/enigma-p2p-monitor/workflows/Tests/badge.svg)](https://github.com/enigmampc/enigma-p2p-monitor/actions)
 
 # CLI Options
 
