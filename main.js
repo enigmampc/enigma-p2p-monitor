@@ -90,29 +90,29 @@ if (boostrapNodes.length === 0) {
 
   // When we find a bootstrap, connect with them.
   // The DHT will take care of connecting us to the other peers
-  {
-    let connected = false;
-    node.on("peer:discovery", async peerInfo => {
-      if (connected) {
-        return;
-      }
 
-      const nodeDial = promisify(node.dial).bind(node);
-      try {
-        await nodeDial(peerInfo);
-        connected = true;
-      } catch (e) {
-        // Discovered a peer but couldn't connect.
-        // Will try again in ${peerDiscovery.bootstrap.interval}ms time
-      }
-    });
-  }
+  let connected = 0;
+  node.on("peer:discovery", async peerInfo => {
+    if (connected > 0) {
+      return;
+    }
+
+    const nodeDial = promisify(node.dial).bind(node);
+    try {
+      await nodeDial(peerInfo);
+    } catch (e) {
+      // Discovered a peer but couldn't connect.
+      // Will try again in ${peerDiscovery.bootstrap.interval}ms time
+    }
+  });
 
   node.on("peer:connect", peerInfo => {
+    connected += 1;
     console.error("peer:connect\t" + peerInfo.id.toB58String());
   });
 
   node.on("peer:disconnect", peerInfo => {
+    connected -= 1;
     console.error("peer:disconnect\t" + peerInfo.id.toB58String());
   });
 
