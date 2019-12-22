@@ -4,7 +4,8 @@ const exec = promisify(require("child_process").exec);
 const assert = require("assert");
 
 let truffleDevelopProcess;
-let account;
+let operationalAddress;
+let stakingAddress;
 
 before(async function() {
   this.timeout(120000);
@@ -14,11 +15,18 @@ before(async function() {
   truffleDevelopProcess = spawn("npx", ["truffle", "develop"], { cwd: "/tmp/enigma-p2p/test/ethereum/scripts" });
   return new Promise(async resolve => {
     truffleDevelopProcess.stdout.on("data", async data => {
-      data = data.toString().match(/\(0\) 0x[a-f0-9]+/);
-      if (Array.isArray(data) && data.length === 1) {
-        account = data[0].split(" ")[1];
-        assert(account.length > 0);
-        resolve();
+      const account1data = data.toString().match(/\(0\) 0x[a-f0-9]+/);
+      if (Array.isArray(account1data) && account1data.length === 1) {
+        operationalAddress = account1data[0].split(" ")[1];
+        assert(operationalAddress.length > 0);
+
+        const account2data = data.toString().match(/\(1\) 0x[a-f0-9]+/);
+        if (Array.isArray(account2data) && account2data.length === 1) {
+          stakingAddress = account2data[0].split(" ")[1];
+          assert(stakingAddress.length > 0);
+
+          resolve();
+        }
       }
     });
   });
@@ -58,7 +66,7 @@ afterEach(async () => {
   killList = [];
 });
 
-function initBootstrap({ lonely }) {
+function initBootstrap() {
   const bootstrap = spawn(
     "node",
     [
@@ -72,10 +80,12 @@ function initBootstrap({ lonely }) {
       "--core",
       "127.0.0.1:3456",
       "--ethereum-address",
-      account,
+      operationalAddress,
+      "--staking-address",
+      stakingAddress,
       "--ethereum-contract-address",
       enigmaContractAddress,
-      lonely ? "--lonely-node" : undefined
+      "--lonely-node"
     ],
     { cwd: "/tmp/enigma-p2p" }
   );
@@ -125,7 +135,7 @@ describe("start after bootstrap", function() {
   this.timeout(60000);
 
   it("connect to bootstrap", function() {
-    const bootstrap = initBootstrap({ lonely: false });
+    const bootstrap = initBootstrap();
     const monitor = initMonitor();
 
     return new Promise(resolve => {
@@ -139,7 +149,7 @@ describe("start after bootstrap", function() {
   });
 
   it("subscribe to worker topic", function() {
-    const bootstrap = initBootstrap({ lonely: false });
+    const bootstrap = initBootstrap();
     const monitor = initMonitor();
 
     return new Promise(resolve => {
@@ -158,7 +168,7 @@ describe("start before bootstrap", function() {
 
   it("connect to bootstrap", function() {
     const monitor = initMonitor();
-    const bootstrap = initBootstrap({ lonely: false });
+    const bootstrap = initBootstrap();
 
     return new Promise(resolve => {
       monitor.stderr.on("data", async data => {
@@ -172,7 +182,7 @@ describe("start before bootstrap", function() {
 
   it("subscribe to worker topic", function() {
     const monitor = initMonitor();
-    const bootstrap = initBootstrap({ lonely: true });
+    const bootstrap = initBootstrap();
 
     return new Promise(resolve => {
       monitor.stderr.on("data", async data => {
@@ -188,7 +198,7 @@ describe("start before bootstrap", function() {
 it("receive message from a subscribed topic", function() {
   this.timeout(60000);
 
-  const bootstrap = initBootstrap({ lonely: false });
+  const bootstrap = initBootstrap();
   const monitor = initMonitor();
 
   return new Promise(resolve => {
