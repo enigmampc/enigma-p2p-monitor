@@ -4,12 +4,13 @@ on: [push]
 
 jobs:
   tests:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-node@v1.1.0
-    - run: |
-        yarn install
-        yarn test
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1.1.0
+        with:
+          node-version: 10.15.2 # for enigma-p2p
+      - run: |
+          yarn install
+          yarn test
