@@ -138,12 +138,22 @@ describe("start after bootstrap", function() {
     const bootstrap = initBootstrap();
     const monitor = initMonitor();
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       monitor.stderr.on("data", async data => {
         data = data.toString();
         if (data.includes("peer:connect\tQmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm")) {
           resolve();
         }
+      });
+
+      let bootstrapError = "";
+      bootstrap.stderr.on("data", async data => {
+        bootstrapError += data.toString();
+      });
+      bootstrap.on("exit", async (code, signal) => {
+        console.error(`Bootstrap exited with code=${code} and signal=${signal}:\n`);
+        console.error(bootstrapError);
+        reject();
       });
     });
   });
@@ -152,12 +162,22 @@ describe("start after bootstrap", function() {
     const bootstrap = initBootstrap();
     const monitor = initMonitor();
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       monitor.stderr.on("data", async data => {
         data = data.toString();
         if (/subscribe\t[a-f0-9]{40}\b/.test(data)) {
           resolve();
         }
+      });
+
+      let bootstrapError = "";
+      bootstrap.stderr.on("data", async data => {
+        bootstrapError += data.toString();
+      });
+      bootstrap.on("exit", async (code, signal) => {
+        console.error(`Bootstrap exited with code=${code} and signal=${signal}:\n`);
+        console.error(bootstrapError);
+        reject();
       });
     });
   });
@@ -170,12 +190,22 @@ describe("start before bootstrap", function() {
     const monitor = initMonitor();
     const bootstrap = initBootstrap();
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       monitor.stderr.on("data", async data => {
         data = data.toString();
         if (data.includes("peer:connect\tQmcrQZ6RJdpYuGvZqD5QEHAv6qX4BrQLJLQPQUrTrzdcgm")) {
           resolve();
         }
+      });
+
+      let bootstrapError = "";
+      bootstrap.stderr.on("data", async data => {
+        bootstrapError += data.toString();
+      });
+      bootstrap.on("exit", async (code, signal) => {
+        console.error(`Bootstrap exited with code=${code} and signal=${signal}:\n`);
+        console.error(bootstrapError);
+        reject();
       });
     });
   });
@@ -184,12 +214,22 @@ describe("start before bootstrap", function() {
     const monitor = initMonitor();
     const bootstrap = initBootstrap();
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       monitor.stderr.on("data", async data => {
         data = data.toString();
         if (/subscribe\t[a-f0-9]{40}\b/.test(data)) {
           resolve();
         }
+      });
+
+      let bootstrapError = "";
+      bootstrap.stderr.on("data", async data => {
+        bootstrapError += data.toString();
+      });
+      bootstrap.on("exit", async (code, signal) => {
+        console.error(`Bootstrap exited with code=${code} and signal=${signal}:\n`);
+        console.error(bootstrapError);
+        reject();
       });
     });
   });
@@ -201,7 +241,7 @@ it("receive message from a subscribed topic", function() {
   const bootstrap = initBootstrap();
   const monitor = initMonitor();
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const broadcastMsg = Date.now();
 
     monitor.stdout.on("data", async data => {
@@ -229,6 +269,16 @@ it("receive message from a subscribed topic", function() {
           }
         }, 100);
       }
+    });
+
+    let bootstrapError = "";
+    bootstrap.stderr.on("data", async data => {
+      bootstrapError += data.toString();
+    });
+    bootstrap.on("exit", async (code, signal) => {
+      console.error(`Bootstrap exited with code=${code} and signal=${signal}:\n`);
+      console.error(bootstrapError);
+      reject();
     });
   });
 });
